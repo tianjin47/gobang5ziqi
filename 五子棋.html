@@ -1,0 +1,195 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>五子棋</title>
+    <style type="text/css">
+    canvas:hover{
+        cursor: pointer;
+    }
+    </style>
+</head>
+ 
+<body>
+    <canvas width="800" height="800" id="canvas" style="background:rgba(200,200,200,0.5)"></canvas>
+     
+    <script type="text/javascript">
+     
+    //canvas初始化
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext('2d');
+    
+    //1轮到黑棋 2轮到白棋，黑棋的位置flag为1，白棋为2， 黑棋先下
+    var flag = 1;
+     
+    //用二维数组表示棋盘，0表示该位置没有棋子
+    var data = new Array();
+    for(var i=1; i<16; i++){
+        data[i] = new Array();
+        for(var j=1; j<16; j++){
+            data[i][j] = 0;
+        }
+    }
+     
+    window.onload = function() {
+        // 1.绘制棋盘
+        drawGrid();
+        // 2.绘制棋子
+        drawPiece();
+    }
+     
+    function drawGrid() {
+        //绘制棋盘的X轴
+        for(var i=1; i<16; i++){
+            context.beginPath();
+            context.moveTo(50, 50*i);
+            context.lineTo(750, 50*i);
+            context.closePath();
+            context.stroke();
+        }
+
+        //绘制棋盘的Y轴
+        for(var i=1; i<16; i++){
+            context.beginPath();
+            context.moveTo(50*i, 50);
+            context.lineTo(50*i, 750);
+            context.closePath();
+            context.stroke();
+        }
+    }
+     
+    function drawPiece() {
+        canvas.onclick = function(){
+
+            //获取鼠标点击的位置并将其转换成棋盘坐标
+            var x = Math.round(event.clientX/50);
+            var y = Math.round(event.clientY/50);
+            
+            //数组不为零时代表该处已有棋子
+            if(data[x][y] !=0){
+                alert("棋子不能重复"); return false;
+            }
+
+            //flag为1代表轮到黑子下
+            if(flag == 1){
+                //该位置标记1，代表此位置是黑子
+                data[x][y] = 1;
+                context.fillStyle = "#000";
+                context.beginPath();
+                context.arc((x*50), (y*50), 20, 0, 2*Math.PI, false);
+                context.closePath();
+                context.fill();
+                //判断是否胜利
+                judge(x, y, flag);
+                //若没有胜利轮到白子下
+                flag = 2;
+            }
+            //否则轮到白子下
+            else{
+                data[x][y] = 2;
+                context.fillStyle = "#fff";
+                context.beginPath();
+                context.arc((x*50), (y*50), 20, 0*Math.PI, 2*Math.PI, false);
+                context.closePath();
+                context.fill();
+                //判断是否胜利
+                judge(x, y, flag);
+                //若没有胜利轮到黑子下
+                flag = 1;
+            }
+        }
+ 
+        function judge(x, y, flag) {
+            //分别代表四个方向：上下，左右，两个斜角
+            var count1 = 0;
+            var count2 = 0;
+            var count3 = 0;
+            var count4 = 0;
+ 
+            /* 1.水平方向判断 */
+             
+            //向左判断
+            for(var n=x; n>0; n--){
+                if(data[n][y] != flag){
+                    break;
+                }
+                count1 = count1+1;
+            }
+ 
+            //向右判断  x+1 表示在水平方向上判断时不包含当前棋子本身
+            for(var n=x+1; n<16; n++){
+                if(data[n][y] != flag){
+                    break;
+                }
+                count1 = count1+1;
+            }
+ 
+            /* 2.垂直方向判断 */
+ 
+            //向上判断
+            for(var n=y; n>0; n--){
+                if(data[x][n] != flag){
+                    break;
+                }
+                count2 = count2+1;
+            }
+ 
+            //向下判断 y+1 表示在垂直方向上判断时不包含当前棋子本身
+            for(var n=y+1; n<16; n++){
+                if(data[x][n] != flag){
+                    break;
+                }
+                count2 = count2+1;
+            }
+ 
+            /* 3.斜对角（右下左上方向）*/
+ 
+            //右下左上
+            for(var n=x, m=y; n>1 && m>1; n--, m--){
+ 
+                if(data[n][m] != flag){
+                    break;
+                }
+                count3 = count3+1;
+                 
+            }
+ 
+            for(var n=x+1, m=y+1; n<16 && m<16; n++, m++){
+ 
+                if(data[n][m] != flag){
+                    break;
+                }
+                count3 = count3+1;
+            }
+ 
+            for(var n=x, m=y; n<16 && m>1; n++, m--){
+ 
+                if(data[n][m] != flag){
+                    break;
+                }
+                count4 = count4+1;
+            }
+ 
+            for(var n=x-1, m=y+1; n>0 && m<16; n--, m++){
+                 
+                if(data[n][m] != flag){
+                    break;
+                }
+ 
+                count4 = count4+1;
+            }
+             
+ 
+            if(count1>=5 || count2>=5 || count3>=5 || count4>=5){
+                if(flag == 1){
+                    alert("黑棋赢了！");
+                    return false;
+                }else{
+                    alert("白起赢了！");
+                }
+            }
+        }
+    }
+    </script>
+</body>
+</html>
